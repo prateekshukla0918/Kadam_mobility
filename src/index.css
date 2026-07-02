@@ -370,6 +370,21 @@ body {
   background: rgba(255,255,255,0.02);
 }
 
+/* ─── Responsive Dashboard ─── */
+@media (max-width: 640px) {
+  .hide-mobile { display: none !important; }
+  .dashboard-body { padding: 12px !important; gap: 8px !important; }
+}
+@media (max-width: 1024px) {
+  .dashboard-sidebar-stacked { flex-direction: column !important; }
+  .dashboard-sidebar-stacked > .map-area { min-height: 350px; }
+  .dashboard-sidebar-stacked > .sidebar-area { max-height: 300px; width: 100% !important; }
+}
+@media (max-width: 640px) {
+  .dashboard-sidebar-stacked > .sidebar-area { max-height: 240px; }
+  .detail-panel-mobile { width: 100% !important; max-width: 100% !important; }
+}
+
 /* ─── Notification Toast ─── */
 .toast-container {
   position: fixed;

@@ -1,8 +1,10 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/layout/Sidebar';
 import Topbar from './components/layout/Topbar';
 import ToastContainer from './components/ui/ToastContainer';
+import useMediaQuery from './hooks/useMediaQuery';
 
 // Page imports
 import Dashboard from './pages/Dashboard';
@@ -17,20 +19,27 @@ import Settings from './pages/Settings';
 import Vehicles from './pages/Vehicles'; // New page component
 
 function AppContent() {
-  const { sidebarCollapsed } = useApp();
+  const { sidebarCollapsed, setSidebarCollapsed } = useApp();
+  const isMobile = useMediaQuery('(max-width: 640px)');
+  const marginLeft = isMobile ? 0 : (sidebarCollapsed ? 72 : 260);
+
+  useEffect(() => {
+    if (isMobile) setSidebarCollapsed(true);
+  }, [isMobile]);
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       {/* Sidebar on the left */}
-      <Sidebar />
+      {!isMobile && <Sidebar />}
+      {isMobile && <MobileSidebarOverlay />}
 
       {/* Main Content on the right */}
       <div
         className="sidebar-transition"
         style={{
           flex: 1,
-          marginLeft: sidebarCollapsed ? 72 : 260,
-          paddingTop: 64, // topbar height
+          marginLeft,
+          paddingTop: isMobile ? 56 : 64,
           position: 'relative',
           display: 'flex',
           flexDirection: 'column',
@@ -60,6 +69,19 @@ function AppContent() {
       {/* Global Alert Toasts */}
       <ToastContainer />
     </div>
+  );
+}
+
+function MobileSidebarOverlay() {
+  const { sidebarCollapsed, setSidebarCollapsed } = useApp();
+  if (sidebarCollapsed) return null;
+  return (
+    <>
+      <div onClick={() => setSidebarCollapsed(true)} style={{
+        position: 'fixed', inset: 0, zIndex: 99, background: 'rgba(0,0,0,0.3)',
+      }} />
+      <Sidebar />
+    </>
   );
 }
 

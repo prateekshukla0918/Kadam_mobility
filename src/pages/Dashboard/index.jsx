@@ -8,6 +8,7 @@ import {
   MdSearch, MdClose, MdEvStation
 } from 'react-icons/md';
 import { useApp } from '../../context/AppContext';
+import useMediaQuery from '../../hooks/useMediaQuery';
 import AnimatedNumber from '../../components/ui/AnimatedNumber';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -91,6 +92,9 @@ export default function Dashboard() {
   const [tab, setTab] = useState('vehicles');
   const [showStations, setShowStations] = useState(true);
 
+  const isMobile = useMediaQuery('(max-width: 640px)');
+  const isTablet = useMediaQuery('(max-width: 1024px)');
+
   const filteredVehicles = useMemo(() => vehicles.filter(v => {
     const q = search.toLowerCase();
     return (statusFilter === 'All' || v.status === statusFilter) &&
@@ -109,20 +113,23 @@ export default function Dashboard() {
     { label: 'Active Trips', value: stats.running, icon: MdRadar, color: '#f472b6' },
   ];
 
+  const kpiCols = isMobile ? 2 : isTablet ? 3 : 5;
+  const isStacked = isMobile || isTablet;
+
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px 20px', overflow: 'hidden', gap: 12 }}>
+    <div className="dashboard-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px 20px', overflow: 'hidden', gap: 12 }}>
 
       {/* KPI Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, flexShrink: 0 }}>
-        {kpiItems.map(kpi => (
-          <div key={kpi.label} className="card" style={{ padding: '14px 16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: `${kpi.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <kpi.icon size={15} color={kpi.color} />
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${kpiCols}, 1fr)`, gap: 10, flexShrink: 0 }}>
+        {kpiItems.slice(0, isMobile ? 4 : 5).map(kpi => (
+          <div key={kpi.label} className="card" style={{ padding: isMobile ? '10px 12px' : '14px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 6 : 8, marginBottom: isMobile ? 4 : 6 }}>
+              <div style={{ width: isMobile ? 24 : 28, height: isMobile ? 24 : 28, borderRadius: 8, background: `${kpi.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <kpi.icon size={isMobile ? 13 : 15} color={kpi.color} />
               </div>
-              <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500 }}>{kpi.label}</span>
+              <span style={{ fontSize: isMobile ? 10 : 11, color: 'var(--text-secondary)', fontWeight: 500 }}>{kpi.label}</span>
             </div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>
+            <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>
               <AnimatedNumber value={kpi.value} suffix={kpi.suffix || ''} decimals={kpi.decimals || 0} />
             </div>
           </div>
@@ -130,10 +137,10 @@ export default function Dashboard() {
       </div>
 
       {/* Map + Sidebar */}
-      <div style={{ flex: 1, display: 'flex', gap: 12, minHeight: 0 }}>
+      <div className={isStacked ? 'dashboard-sidebar-stacked' : ''} style={{ flex: 1, display: 'flex', gap: 12, minHeight: 0, ...(isStacked ? { flexDirection: 'column' } : {}) }}>
 
         {/* Map */}
-        <div style={{ flex: 1, borderRadius: 16, overflow: 'hidden', border: '1px solid var(--border-color)', position: 'relative' }}>
+        <div className="map-area" style={{ flex: 1, borderRadius: 16, overflow: 'hidden', border: '1px solid var(--border-color)', position: 'relative', ...(isStacked ? { minHeight: isMobile ? 300 : 380 } : {}) }}>
           <MapContainer center={[28.6139, 77.2090]} zoom={11} style={{ height: '100%', width: '100%' }} zoomControl={true}>
             <TileLayer
               url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -172,15 +179,21 @@ export default function Dashboard() {
           <AnimatePresence>
             {selectedData && (
               <motion.div
-                initial={{ x: -360, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -360, opacity: 0 }}
+                initial={{ x: isMobile ? 0 : -360, y: isMobile ? 80 : 0, opacity: 0 }}
+                animate={{ x: 0, y: 0, opacity: 1 }}
+                exit={{ x: isMobile ? 0 : -360, y: isMobile ? 80 : 0, opacity: 0 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                 style={{
-                  position: 'absolute', top: 0, left: 0, bottom: 0, width: 300, zIndex: 1001,
-                  background: 'var(--bg-card)', borderRight: '1px solid var(--border-color)',
+                  position: 'absolute', top: isMobile ? 'auto' : 0, left: 0, bottom: 0,
+                  width: isMobile ? '100%' : 300, zIndex: 1001,
+                  maxHeight: isMobile ? '75%' : '100%',
+                  background: 'var(--bg-card)',
+                  borderRight: isMobile ? 'none' : '1px solid var(--border-color)',
+                  borderTop: isMobile ? '1px solid var(--border-color)' : 'none',
+                  borderTopLeftRadius: isMobile ? 16 : 0,
+                  borderTopRightRadius: isMobile ? 16 : 0,
                   display: 'flex', flexDirection: 'column', overflow: 'hidden',
-                  boxShadow: '4px 0 24px rgba(0,0,0,0.1)',
+                  boxShadow: isMobile ? '0 -4px 24px rgba(0,0,0,0.15)' : '4px 0 24px rgba(0,0,0,0.1)',
                 }}
               >
                 <div style={{
@@ -253,14 +266,16 @@ export default function Dashboard() {
         </div>
 
         {/* Sidebar */}
-        <div style={{ width: 300, flexShrink: 0, background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="sidebar-area" style={{ width: isStacked ? '100%' : 300, maxHeight: isStacked ? (isMobile ? 240 : 300) : 'none', flexShrink: 0, background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Search */}
-          <div style={{ padding: '12px', borderBottom: '1px solid var(--border-color)' }}>
-            <div style={{ position: 'relative' }}>
-              <MdSearch size={15} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input className="input-field" placeholder="Search vehicle..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 30, fontSize: 12, padding: '6px 10px 6px 30px' }} />
-            </div>
-            <div style={{ display: 'flex', gap: 4, marginTop: 8, flexWrap: 'wrap' }}>
+          <div style={{ padding: isMobile ? '8px 10px' : '12px', borderBottom: '1px solid var(--border-color)' }}>
+            {!isMobile && (
+              <div style={{ position: 'relative' }}>
+                <MdSearch size={15} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input className="input-field" placeholder="Search vehicle..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 30, fontSize: 12, padding: '6px 10px 6px 30px' }} />
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 4, marginTop: isMobile ? 0 : 8, flexWrap: 'wrap' }}>
               {['All', 'Running', 'Charging', 'Idle', 'Offline'].map(s => (
                 <button key={s} onClick={() => setStatusFilter(s)} style={{
                   padding: '3px 8px', borderRadius: 20, border: '1px solid', fontSize: 10, cursor: 'pointer', fontWeight: 500,
