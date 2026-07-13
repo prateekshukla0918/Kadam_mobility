@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/layout/Sidebar';
 import Topbar from './components/layout/Topbar';
-import ToastContainer from './components/ui/ToastContainer';
 import useMediaQuery from './hooks/useMediaQuery';
 
 // Page imports
@@ -12,11 +11,10 @@ import Analytics from './pages/Analytics';
 import Drivers from './pages/Drivers';
 import Trips from './pages/Trips';
 import ChargingStations from './pages/ChargingStations';
-import Alerts from './pages/Alerts';
 import Reports from './pages/Reports';
 import Admin from './pages/Admin';
 import Settings from './pages/Settings';
-import Vehicles from './pages/Vehicles'; // New page component
+import Vehicles from './pages/Vehicles';
 
 function AppContent() {
   const { sidebarCollapsed, setSidebarCollapsed } = useApp();
@@ -58,16 +56,12 @@ function AppContent() {
             <Route path="/drivers" element={<Drivers />} />
             <Route path="/trips" element={<Trips />} />
             <Route path="/charging" element={<ChargingStations />} />
-            <Route path="/alerts" element={<Alerts />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>
       </div>
-
-      {/* Global Alert Toasts */}
-      <ToastContainer />
     </div>
   );
 }

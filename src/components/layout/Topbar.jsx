@@ -1,11 +1,10 @@
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  MdNotifications, MdPerson, MdMenu
+  MdPerson, MdMenu
 } from 'react-icons/md';
 import { useApp } from '../../context/AppContext';
 import useMediaQuery from '../../hooks/useMediaQuery';
-import NotificationPanel from './NotificationPanel';
 
 const PAGE_TITLES = {
   '/': 'Dashboard',
@@ -14,7 +13,6 @@ const PAGE_TITLES = {
   '/drivers': 'Driver Management',
   '/trips': 'Trip Management',
   '/charging': 'Charging Stations',
-  '/alerts': 'Alert Center',
   '/reports': 'Reports',
   '/admin': 'Admin Portal',
   '/settings': 'Settings',
@@ -22,7 +20,7 @@ const PAGE_TITLES = {
 
 export default function Topbar() {
   const location = useLocation();
-  const { stats, notifPanelOpen, setNotifPanelOpen, sidebarCollapsed, setSidebarCollapsed } = useApp();
+  const { stats, sidebarCollapsed, setSidebarCollapsed } = useApp();
   const title = PAGE_TITLES[location.pathname] || 'KADAM mobility';
   const isMobile = useMediaQuery('(max-width: 640px)');
   const left = (isMobile || sidebarCollapsed) ? 0 : 260;
@@ -77,31 +75,9 @@ export default function Topbar() {
           borderRadius: 20, padding: isMobile ? '3px 8px' : '5px 12px', flexShrink: 0,
         }}>
           <span className="live-dot" />
-          <span style={{ fontSize: isMobile ? 10 : 12, color: '#10b981', fontWeight: 600 }} className={isMobile ? '' : ''}>
+          <span style={{ fontSize: isMobile ? 10 : 12, color: '#10b981', fontWeight: 600 }}>
             {isMobile ? '' : `${stats.running} `}LIVE
           </span>
-        </div>
-
-        {/* Notifications */}
-        <div style={{ position: 'relative' }}>
-          <IconBtn onClick={() => setNotifPanelOpen(o => !o)} title="Notifications">
-            <MdNotifications size={isMobile ? 18 : 20} />
-            {stats.unreadAlerts > 0 && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                style={{
-                  position: 'absolute', top: -2, right: -2,
-                  background: '#ef4444', color: 'white',
-                  fontSize: 9, fontWeight: 700, borderRadius: '50%',
-                  width: isMobile ? 14 : 16, height: isMobile ? 14 : 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: '2px solid var(--bg-secondary)',
-                }}
-              >
-                {Math.min(stats.unreadAlerts, 9)}
-              </motion.span>
-            )}
-          </IconBtn>
         </div>
 
         {/* User Avatar */}
@@ -125,35 +101,6 @@ export default function Topbar() {
           </div>
         </div>
       </header>
-
-      {/* Notification Panel */}
-      <NotificationPanel />
     </>
-  );
-}
-
-function IconBtn({ children, onClick, title }) {
-  return (
-    <button
-      onClick={onClick}
-      title={title}
-      style={{
-        width: 36, height: 36, borderRadius: 10,
-        background: 'var(--glass-bg)', border: '1px solid var(--border-color)',
-        color: 'var(--text-muted)', cursor: 'pointer',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'all 0.2s', position: 'relative', flexShrink: 0,
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.color = 'var(--text-primary)';
-        e.currentTarget.style.borderColor = 'var(--border-color-hover)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.color = 'var(--text-muted)';
-        e.currentTarget.style.borderColor = 'var(--border-color)';
-      }}
-    >
-      {children}
-    </button>
   );
 }

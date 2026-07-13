@@ -2,7 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MdDashboard, MdBarChart, MdDirectionsCar,
-  MdPeople, MdRoute, MdEvStation, MdNotifications,
+  MdPeople, MdRoute, MdEvStation,
   MdAssessment, MdAdminPanelSettings, MdSettings,
   MdChevronLeft, MdChevronRight, MdElectricCar
 } from 'react-icons/md';
@@ -15,7 +15,6 @@ const NAV_ITEMS = [
   { path: '/drivers', label: 'Drivers', icon: MdPeople },
   { path: '/trips', label: 'Trips', icon: MdRoute },
   { path: '/charging', label: 'Charging', icon: MdEvStation },
-  { path: '/alerts', label: 'Alerts', icon: MdNotifications, badge: true },
   { path: '/reports', label: 'Reports', icon: MdAssessment },
   { path: '/admin', label: 'Admin', icon: MdAdminPanelSettings },
   { path: '/settings', label: 'Settings', icon: MdSettings },
@@ -81,7 +80,6 @@ export default function Sidebar() {
             key={item.path}
             item={item}
             collapsed={sidebarCollapsed}
-            unreadAlerts={stats.unreadAlerts}
           />
         ))}
       </nav>
@@ -127,7 +125,7 @@ export default function Sidebar() {
   );
 }
 
-function SidebarItem({ item, collapsed, unreadAlerts }) {
+function SidebarItem({ item, collapsed }) {
   return (
     <NavLink
       to={item.path}
@@ -174,36 +172,10 @@ function SidebarItem({ item, collapsed, unreadAlerts }) {
                 style={{ fontSize: 13.5, fontWeight: isActive ? 600 : 400 }}
               >
                 {item.label}
-              </motion.span>
+                </motion.span>
             )}
           </AnimatePresence>
-          {item.badge && unreadAlerts > 0 && (
-            <motion.span
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              style={{
-                marginLeft: 'auto',
-                background: '#ef4444',
-                color: 'white',
-                fontSize: 10,
-                fontWeight: 700,
-                borderRadius: 10,
-                padding: '1px 6px',
-                minWidth: 18,
-                textAlign: 'center',
-              }}
-            >
-              {collapsed ? '' : Math.min(unreadAlerts, 99)}
-            </motion.span>
-          )}
-          {item.badge && unreadAlerts > 0 && collapsed && (
-            <span style={{
-              position: 'absolute', top: 6, right: 6,
-              width: 8, height: 8, borderRadius: '50%',
-              background: '#ef4444',
-            }} />
-          )}
-        </>
+          </>
       )}
     </NavLink>
   );
